@@ -1,3 +1,6 @@
+#ifndef OBD2UART_h
+#define OBD2UART_h
+
 /*************************************************************************
 * Arduino Library for Freematics OBD-II UART Adapter
 * Distributed under BSD License
@@ -171,3 +174,4 @@ private:
 	char* getResultValue(char* buf);
 };
 
+#endif

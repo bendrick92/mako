@@ -3,6 +3,7 @@
 #include "Mako.h"
 #include "Gauge.h"
 #include "touch.h"
+#include "OBD2UART.h"
 
 extern uint8_t SmallFont[];
 extern uint8_t BigFont[];
@@ -19,6 +20,72 @@ void Mako::init(byte orientation, bool testMode)
 
     resetScreen();
     drawCenteredMessage("Initializing...");
+
+    _obd.begin();
+    _obd.init();
+    if (_obd.getState() != 2) {
+        _testMode = true;
+    }
+
+    drawDefaultGauge();
+}
+
+void Mako::process()
+{
+    int currentGaugeType = getCurrentGaugeType();
+
+    switch (currentGaugeType) {
+        case 0: {
+            int intakeKpa = 0;
+            int atmosKpa = 0;
+            float boostPsi = 0.0;
+
+            if (!_testMode) {
+                _obd.readPID(PID_INTAKE_MAP,intakeKpa);
+                _obd.readPID(PID_BAROMETRIC,atmosKpa);
+                boostPsi = (intakeKpa - atmosKpa) * 0.145;
+            }
+
+            drawBoostNeedle(boostPsi,true);
+
+            break;
+        }
+        case 1: {
+            int kph = 0;
+            int mph = 0;
+
+            if (!_testMode) {
+                _obd.readPID(PID_SPEED,kph);
+                mph = kph * 0.621;
+            }
+
+            drawMphNeedle(mph,true);
+
+            break;
+        }
+        case 2: {
+            int rpm = 0;
+
+            if (!_testMode) {
+                _obd.readPID(PID_RPM,rpm);
+            }
+
+            drawRpmNeedle(rpm,true);
+
+            break;
+        }
+        case 3: {
+            int throttlePerc = 0;
+
+            if (!_testMode) {
+                _obd.readPID(PID_RELATIVE_THROTTLE_POS,throttlePerc);
+            }
+
+            drawThrottleNeedle(throttlePerc,true);
+            
+            break;
+        }
+    }
 }
 
 void Mako::readTouchInput()

@@ -3,6 +3,7 @@
 
 #include "UTFT.h"
 #include "Gauge.h"
+#include "OBD2UART.h"
 
 class Mako : public UTFT
 {
@@ -11,11 +12,13 @@ class Mako : public UTFT
         {
             
         }
+        COBD _obd;
         int _windowWidth;
         int _windowHeight;
         bool _testMode;
         Gauge _gauge;
         void init(byte orientation, bool testMode);
+        void process();
         void setupGaugeLayout();
         void readTouchInput();
         void processButtonClick(int buttonAction);
