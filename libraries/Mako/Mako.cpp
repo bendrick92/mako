@@ -2,6 +2,7 @@
 #include "math.h"
 #include "Mako.h"
 #include "Gauge.h"
+#include "Menu.h"
 #include "touch.h"
 #include "OBD2UART.h"
 
@@ -22,9 +23,12 @@ void Mako::init(byte orientation, bool testMode)
     drawCenteredMessage("Initializing...");
 
     _obd.begin();
-    _obd.init();
-    if (_obd.getState() != 2) {
-        _testMode = true;
+
+    if (!_testMode) {
+        _obd.init();
+        if (_obd.getState() != 2) {
+            _testMode = true;
+        }
     }
 
     drawDefaultGauge();
@@ -95,43 +99,7 @@ void Mako::readTouchInput()
 
     if (touch.read(x,y))
     {
-        
-        /*Serial.print(_buttons[0]._x1);
-        Serial.print(",");
-        Serial.print(_buttons[0]._y1);
-        Serial.print(":");
-        Serial.print(_buttons[0]._x1 + _buttons[0]._width);
-        Serial.print(",");
-        Serial.print(_buttons[0]._y1 + _buttons[0]._height);
-        Serial.print(" ");
-        Serial.print(x);
-        Serial.print(",");
-        Serial.print(y);
-        Serial.println();
-        
-        if (_buttons[0].clickWithinBounds(x,y))
-        {
-            cycleToPrevGauge();
-        }
-        else if (_buttons[1].clickWithinBounds(x,y))
-        {
-            cycleToNextGauge();
-        }*/
-        
-
         for (int a = 0; a < sizeof(_gauge._buttons)/sizeof(_gauge._buttons[0]); a = a + 1) {
-            Serial.print(_gauge._buttons[a]._x1);
-            Serial.print(",");
-            Serial.print(_gauge._buttons[a]._y1);
-            Serial.print(":");
-            Serial.print(_gauge._buttons[a]._x1 + _gauge._buttons[a]._width);
-            Serial.print(",");
-            Serial.print(_gauge._buttons[a]._y1 + _gauge._buttons[a]._height);
-            Serial.print(" ");
-            Serial.print(x);
-            Serial.print(",");
-            Serial.print(y);
-            Serial.println();
             if (_gauge._buttons[a].clickWithinBounds(x,y)) {
                 processButtonClick(_gauge._buttons[a]._buttonAction);
             }
@@ -164,7 +132,7 @@ void Mako::processButtonClick(int buttonAction)
             cycleToNextGauge();
             break;
         case 7:
-            drawMenu();
+            drawMainMenu();
             break;
     }
 }
@@ -325,58 +293,7 @@ void Mako::drawDefaultGauge()
 
 void Mako::drawBoostGauge()
 {    
-    int centerX = _windowWidth / 2;
-    int centerY = _windowHeight / 2;
-    int radius = 100;
-    int padding = 15;
-    int labelX;
-    int labelY;
-
-    resetScreen();
-
-    drawTitleMessage("BOOST");
-
-    setColor(255,255,255);
-    drawCircle(centerX,centerY,radius);
-
-    setColor(255,255,255);
-    setFont(SmallFont);
-
-    Gauge boostGauge{};
-    boostGauge.init(centerX,centerY,radius,0);
-    _gauge = boostGauge;
-
-    addNextBackButtons();
-    addMenuButton();
-    drawGaugeButtons();
-
-    labelX = _gauge.generateLabelX(getLabelWidth("25"),300,padding);
-    labelY = _gauge.generateLabelY(getLabelHeight("25"),300,padding);
-    addLabel(labelX,labelY,"25");
-    labelX = _gauge.generateLabelX(getLabelWidth("20"),330,padding);
-    labelY = _gauge.generateLabelY(getLabelHeight("20"),330,padding);
-    addLabel(labelX,labelY,"20");
-    labelX = _gauge.generateLabelX(getLabelWidth("15"),0,padding);
-    labelY = _gauge.generateLabelY(getLabelHeight("15"),0,padding);
-    addLabel(labelX,labelY,"15");
-    labelX = _gauge.generateLabelX(getLabelWidth("10"),30,padding);
-    labelY = _gauge.generateLabelY(getLabelHeight("10"),30,padding);
-    addLabel(labelX,labelY,"10");
-    labelX = _gauge.generateLabelX(getLabelWidth("5"),60,padding);
-    labelY = _gauge.generateLabelY(getLabelHeight("5"),60,padding);
-    addLabel(labelX,labelY,"5");
-    labelX = _gauge.generateLabelX(getLabelWidth("0"),90,padding);
-    labelY = _gauge.generateLabelY(getLabelHeight("0"),90,padding);
-    addLabel(labelX,labelY,"0");
-    labelX = _gauge.generateLabelX(getLabelWidth("-5"),120,padding);
-    labelY = _gauge.generateLabelY(getLabelHeight("-5"),120,padding);
-    addLabel(labelX,labelY,"-5");
-    labelX = _gauge.generateLabelX(getLabelWidth("-10"),150,padding);
-    labelY = _gauge.generateLabelY(getLabelHeight("-10"),150,padding);
-    addLabel(labelX,labelY,"-10");
-    labelX = _gauge.generateLabelX(getLabelWidth("-15"),180,padding);
-    labelY = _gauge.generateLabelY(getLabelHeight("-15"),180,padding);
-    addLabel(labelX,labelY,"-15");
+    drawGauge(0,"BOOST");
 }
 
 void Mako::drawBoostNeedle(float psi, bool outputDigital)
@@ -394,70 +311,7 @@ void Mako::drawBoostNeedle(float psi, bool outputDigital)
 
 void Mako::drawMphGauge()
 {
-    int centerX = _windowWidth / 2;
-    int centerY = _windowHeight / 2;
-    int radius = 100;
-    int padding = 15;
-    int labelX;
-    int labelY;
-
-    resetScreen();
-
-    drawTitleMessage("MPH");
-
-    setColor(255,255,255);
-    drawCircle(centerX,centerY,radius);
-
-    setColor(255,255,255);
-    setFont(SmallFont);
-
-    Gauge mphGauge{};
-    mphGauge.init(centerX,centerY,radius,1);
-    _gauge = mphGauge;
-
-    addNextBackButtons();
-    addMenuButton();
-    drawGaugeButtons();
-
-    labelX = _gauge.generateLabelX(getLabelWidth("0"),180,padding);
-    labelY = _gauge.generateLabelY(getLabelHeight("0"),180,padding);
-    addLabel(labelX,labelY,"0");
-    labelX = _gauge.generateLabelX(getLabelWidth("10"),165,padding);
-    labelY = _gauge.generateLabelY(getLabelHeight("10"),165,padding);
-    addLabel(labelX,labelY,"10");
-    labelX = _gauge.generateLabelX(getLabelWidth("20"),150,padding);
-    labelY = _gauge.generateLabelY(getLabelHeight("20"),150,padding);
-    addLabel(labelX,labelY,"20");
-    labelX = _gauge.generateLabelX(getLabelWidth("30"),135,padding);
-    labelY = _gauge.generateLabelY(getLabelHeight("30"),135,padding);
-    addLabel(labelX,labelY,"30");
-    labelX = _gauge.generateLabelX(getLabelWidth("40"),120,padding);
-    labelY = _gauge.generateLabelY(getLabelHeight("40"),120,padding);
-    addLabel(labelX,labelY,"40");
-    labelX = _gauge.generateLabelX(getLabelWidth("50"),105,padding);
-    labelY = _gauge.generateLabelY(getLabelHeight("50"),105,padding);
-    addLabel(labelX,labelY,"50");
-    labelX = _gauge.generateLabelX(getLabelWidth("60"),90,padding);
-    labelY = _gauge.generateLabelY(getLabelHeight("60"),90,padding);
-    addLabel(labelX,labelY,"60");
-    labelX = _gauge.generateLabelX(getLabelWidth("70"),75,padding);
-    labelY = _gauge.generateLabelY(getLabelHeight("70"),75,padding);
-    addLabel(labelX,labelY,"70");
-    labelX = _gauge.generateLabelX(getLabelWidth("80"),60,padding);
-    labelY = _gauge.generateLabelY(getLabelHeight("80"),60,padding);
-    addLabel(labelX,labelY,"80");
-    labelX = _gauge.generateLabelX(getLabelWidth("90"),45,padding);
-    labelY = _gauge.generateLabelY(getLabelHeight("90"),45,padding);
-    addLabel(labelX,labelY,"90");
-    labelX = _gauge.generateLabelX(getLabelWidth("100"),30,padding);
-    labelY = _gauge.generateLabelY(getLabelHeight("100"),30,padding);
-    addLabel(labelX,labelY,"100");
-    labelX = _gauge.generateLabelX(getLabelWidth("110"),15,padding);
-    labelY = _gauge.generateLabelY(getLabelHeight("110"),15,padding);
-    addLabel(labelX,labelY,"110");
-    labelX = _gauge.generateLabelX(getLabelWidth("120"),0,padding);
-    labelY = _gauge.generateLabelY(getLabelHeight("120"),0,padding);
-    addLabel(labelX,labelY,"120");
+    drawGauge(1,"MPH");
 }
 
 void Mako::drawMphNeedle(int mph, bool outputDigital)
@@ -475,61 +329,7 @@ void Mako::drawMphNeedle(int mph, bool outputDigital)
 
 void Mako::drawRpmGauge()
 {    
-    int centerX = _windowWidth / 2;
-    int centerY = _windowHeight / 2;
-    int radius = 100;
-    int padding = 15;
-    int labelX;
-    int labelY;
-
-    resetScreen();
-
-    drawTitleMessage("RPM");    
-
-    setColor(255,255,255);
-    drawCircle(centerX,centerY,radius);
-
-    setColor(255,255,255);
-    setFont(SmallFont);
-
-    Gauge rpmGauge{};
-    rpmGauge.init(centerX,centerY,radius,2);
-    _gauge = rpmGauge;
-
-    addNextBackButtons();
-    addMenuButton();
-    drawGaugeButtons();
-
-    labelX = _gauge.generateLabelX(getLabelWidth("0"),180,padding);
-    labelY = _gauge.generateLabelY(getLabelHeight("0"),180,padding);
-    addLabel(labelX,labelY,"0");
-    labelX = _gauge.generateLabelX(getLabelWidth("1"),150,padding);
-    labelY = _gauge.generateLabelY(getLabelHeight("1"),150,padding);
-    addLabel(labelX,labelY,"1");
-    labelX = _gauge.generateLabelX(getLabelWidth("2"),120,padding);
-    labelY = _gauge.generateLabelY(getLabelHeight("2"),120,padding);
-    addLabel(labelX,labelY,"2");
-    labelX = _gauge.generateLabelX(getLabelWidth("3"),90,padding);
-    labelY = _gauge.generateLabelY(getLabelHeight("3"),90,padding);
-    addLabel(labelX,labelY,"3");
-    labelX = _gauge.generateLabelX(getLabelWidth("4"),60,padding);
-    labelY = _gauge.generateLabelY(getLabelHeight("4"),60,padding);
-    addLabel(labelX,labelY,"4");
-    labelX = _gauge.generateLabelX(getLabelWidth("5"),30,padding);
-    labelY = _gauge.generateLabelY(getLabelHeight("5"),30,padding);
-    addLabel(labelX,labelY,"5");
-    labelX = _gauge.generateLabelX(getLabelWidth("6"),0,padding);
-    labelY = _gauge.generateLabelY(getLabelHeight("6"),0,padding);
-    addLabel(labelX,labelY,"6");
-    labelX = _gauge.generateLabelX(getLabelWidth("7"),330,padding);
-    labelY = _gauge.generateLabelY(getLabelHeight("7"),330,padding);
-    addLabel(labelX,labelY,"7");
-    labelX = _gauge.generateLabelX(getLabelWidth("8"),300,padding);
-    labelY = _gauge.generateLabelY(getLabelHeight("8"),300,padding);
-    addLabel(labelX,labelY,"8");
-    labelX = _gauge.generateLabelX(getLabelWidth("9"),270,padding);
-    labelY = _gauge.generateLabelY(getLabelHeight("9"),270,padding);
-    addLabel(labelX,labelY,"9");
+    drawGauge(2,"RPM");
 }
 
 void Mako::drawRpmNeedle(int rpm, bool outputDigital)
@@ -547,43 +347,7 @@ void Mako::drawRpmNeedle(int rpm, bool outputDigital)
 
 void Mako::drawThrottleGauge()
 {
-    int centerX = _windowWidth / 2;
-    int centerY = _windowHeight / 2;
-    int radius = 100;
-    int padding = 15;
-    int labelX;
-    int labelY;
-
-    resetScreen();
-
-    drawTitleMessage("THROTTLE");
-
-    setColor(255,255,255);
-    drawCircle(centerX,centerY,radius);
-
-    setColor(255,255,255);
-    setFont(SmallFont);
-
-    Gauge throttleGauge{};
-    throttleGauge.init(centerX,centerY,radius,3);
-    _gauge = throttleGauge;
-    
-    addNextBackButtons();
-    addMenuButton();
-    drawGaugeButtons();
-
-    labelX = _gauge.generateLabelX(getLabelWidth("0"),180,padding);
-    labelY = _gauge.generateLabelY(getLabelHeight("0"),180,padding);
-    addLabel(labelX,labelY,"0");
-    labelX = _gauge.generateLabelX(getLabelWidth("25"),90,padding);
-    labelY = _gauge.generateLabelY(getLabelHeight("25"),90,padding);
-    addLabel(labelX,labelY,"25");
-    labelX = _gauge.generateLabelX(getLabelWidth("50"),0,padding);
-    labelY = _gauge.generateLabelY(getLabelHeight("50"),0,padding);
-    addLabel(labelX,labelY,"50");
-    labelX = _gauge.generateLabelX(getLabelWidth("75"),270,padding);
-    labelY = _gauge.generateLabelY(getLabelHeight("75"),270,padding);
-    addLabel(labelX,labelY,"75");
+    drawGauge(3,"THROTTLE");
 }
 
 void Mako::drawThrottleNeedle(int throttlePerc, bool outputDigital)
@@ -599,65 +363,224 @@ void Mako::drawThrottleNeedle(int throttlePerc, bool outputDigital)
     }
 }
 
-void Mako::drawMenu()
+void Mako::drawMainMenu()
+{
+    drawMenu(0,"MAIN MENU");
+}
+
+void Mako::drawGauge(int gaugeType, String title)
+{
+    int centerX = _windowWidth / 2;
+    int centerY = _windowHeight / 2;
+    int radius = 100;
+    int padding = 15;
+    int labelX;
+    int labelY;
+
+    resetScreen();
+
+    drawTitleMessage(title);
+
+    setColor(255,255,255);
+    drawCircle(centerX,centerY,radius);
+
+    setColor(255,255,255);
+    setFont(SmallFont);
+
+    Gauge gauge{};
+    gauge.init(centerX,centerY,radius,gaugeType);
+
+    int backButtonWidth = 50;
+    int backButtonHeight = 30;
+    int backButtonX =  20;
+    int backButtonY = _windowHeight - 50;
+    String backButtonLabel = "Prev";
+    int backButtonAction = 5;
+
+    Button backButton{};
+    backButton.init(backButtonX,backButtonY,backButtonWidth,backButtonHeight,backButtonLabel,backButtonAction);
+    gauge._buttons[0] = backButton;
+
+    int nextButtonWidth = backButtonWidth;
+    int nextButtonHeight = backButtonHeight;
+    int nextButtonX = _windowWidth - nextButtonWidth - 20;
+    int nextButtonY = backButtonY;
+    String nextButtonLabel = "Next";
+    int nextButtonAction = 6;
+
+    Button nextButton{};
+    nextButton.init(nextButtonX,nextButtonY,nextButtonWidth,nextButtonHeight,nextButtonLabel,nextButtonAction);
+    gauge._buttons[1] = nextButton;
+
+    int menuButtonX = 20;
+    int menuButtonY = 50;
+    int menuButtonWidth = 50;
+    int menuButtonHeight = 30;
+    String menuButtonLabel = "Menu";
+    int menuButtonAction = 7;
+
+    Button menuButton{};
+    menuButton.init(menuButtonX,menuButtonY,menuButtonWidth,menuButtonHeight,menuButtonLabel,menuButtonAction);
+    gauge._buttons[2] = menuButton;
+
+    _gauge = gauge;
+    
+    for (int x = 0; x < sizeof(_gauge._buttons)/sizeof(_gauge._buttons[0]); x = x + 1) {
+        addButton(_gauge._buttons[x]._x1,_gauge._buttons[x]._y1,_gauge._buttons[x]._width,_gauge._buttons[x]._height,_gauge._buttons[x]._label);
+    }
+
+    switch (gaugeType) {
+        case 0: {
+            labelX = _gauge.generateLabelX(getLabelWidth("25"),300,padding);
+            labelY = _gauge.generateLabelY(getLabelHeight("25"),300,padding);
+            addLabel(labelX,labelY,"25");
+            labelX = _gauge.generateLabelX(getLabelWidth("20"),330,padding);
+            labelY = _gauge.generateLabelY(getLabelHeight("20"),330,padding);
+            addLabel(labelX,labelY,"20");
+            labelX = _gauge.generateLabelX(getLabelWidth("15"),0,padding);
+            labelY = _gauge.generateLabelY(getLabelHeight("15"),0,padding);
+            addLabel(labelX,labelY,"15");
+            labelX = _gauge.generateLabelX(getLabelWidth("10"),30,padding);
+            labelY = _gauge.generateLabelY(getLabelHeight("10"),30,padding);
+            addLabel(labelX,labelY,"10");
+            labelX = _gauge.generateLabelX(getLabelWidth("5"),60,padding);
+            labelY = _gauge.generateLabelY(getLabelHeight("5"),60,padding);
+            addLabel(labelX,labelY,"5");
+            labelX = _gauge.generateLabelX(getLabelWidth("0"),90,padding);
+            labelY = _gauge.generateLabelY(getLabelHeight("0"),90,padding);
+            addLabel(labelX,labelY,"0");
+            labelX = _gauge.generateLabelX(getLabelWidth("-5"),120,padding);
+            labelY = _gauge.generateLabelY(getLabelHeight("-5"),120,padding);
+            addLabel(labelX,labelY,"-5");
+            labelX = _gauge.generateLabelX(getLabelWidth("-10"),150,padding);
+            labelY = _gauge.generateLabelY(getLabelHeight("-10"),150,padding);
+            addLabel(labelX,labelY,"-10");
+            labelX = _gauge.generateLabelX(getLabelWidth("-15"),180,padding);
+            labelY = _gauge.generateLabelY(getLabelHeight("-15"),180,padding);
+            addLabel(labelX,labelY,"-15");
+
+            break;
+        }
+        case 1: {
+            labelX = _gauge.generateLabelX(getLabelWidth("0"),180,padding);
+            labelY = _gauge.generateLabelY(getLabelHeight("0"),180,padding);
+            addLabel(labelX,labelY,"0");
+            labelX = _gauge.generateLabelX(getLabelWidth("10"),165,padding);
+            labelY = _gauge.generateLabelY(getLabelHeight("10"),165,padding);
+            addLabel(labelX,labelY,"10");
+            labelX = _gauge.generateLabelX(getLabelWidth("20"),150,padding);
+            labelY = _gauge.generateLabelY(getLabelHeight("20"),150,padding);
+            addLabel(labelX,labelY,"20");
+            labelX = _gauge.generateLabelX(getLabelWidth("30"),135,padding);
+            labelY = _gauge.generateLabelY(getLabelHeight("30"),135,padding);
+            addLabel(labelX,labelY,"30");
+            labelX = _gauge.generateLabelX(getLabelWidth("40"),120,padding);
+            labelY = _gauge.generateLabelY(getLabelHeight("40"),120,padding);
+            addLabel(labelX,labelY,"40");
+            labelX = _gauge.generateLabelX(getLabelWidth("50"),105,padding);
+            labelY = _gauge.generateLabelY(getLabelHeight("50"),105,padding);
+            addLabel(labelX,labelY,"50");
+            labelX = _gauge.generateLabelX(getLabelWidth("60"),90,padding);
+            labelY = _gauge.generateLabelY(getLabelHeight("60"),90,padding);
+            addLabel(labelX,labelY,"60");
+            labelX = _gauge.generateLabelX(getLabelWidth("70"),75,padding);
+            labelY = _gauge.generateLabelY(getLabelHeight("70"),75,padding);
+            addLabel(labelX,labelY,"70");
+            labelX = _gauge.generateLabelX(getLabelWidth("80"),60,padding);
+            labelY = _gauge.generateLabelY(getLabelHeight("80"),60,padding);
+            addLabel(labelX,labelY,"80");
+            labelX = _gauge.generateLabelX(getLabelWidth("90"),45,padding);
+            labelY = _gauge.generateLabelY(getLabelHeight("90"),45,padding);
+            addLabel(labelX,labelY,"90");
+            labelX = _gauge.generateLabelX(getLabelWidth("100"),30,padding);
+            labelY = _gauge.generateLabelY(getLabelHeight("100"),30,padding);
+            addLabel(labelX,labelY,"100");
+            labelX = _gauge.generateLabelX(getLabelWidth("110"),15,padding);
+            labelY = _gauge.generateLabelY(getLabelHeight("110"),15,padding);
+            addLabel(labelX,labelY,"110");
+            labelX = _gauge.generateLabelX(getLabelWidth("120"),0,padding);
+            labelY = _gauge.generateLabelY(getLabelHeight("120"),0,padding);
+            addLabel(labelX,labelY,"120");
+
+            break;
+        }
+        case 2: {
+            labelX = _gauge.generateLabelX(getLabelWidth("0"),180,padding);
+            labelY = _gauge.generateLabelY(getLabelHeight("0"),180,padding);
+            addLabel(labelX,labelY,"0");
+            labelX = _gauge.generateLabelX(getLabelWidth("1"),150,padding);
+            labelY = _gauge.generateLabelY(getLabelHeight("1"),150,padding);
+            addLabel(labelX,labelY,"1");
+            labelX = _gauge.generateLabelX(getLabelWidth("2"),120,padding);
+            labelY = _gauge.generateLabelY(getLabelHeight("2"),120,padding);
+            addLabel(labelX,labelY,"2");
+            labelX = _gauge.generateLabelX(getLabelWidth("3"),90,padding);
+            labelY = _gauge.generateLabelY(getLabelHeight("3"),90,padding);
+            addLabel(labelX,labelY,"3");
+            labelX = _gauge.generateLabelX(getLabelWidth("4"),60,padding);
+            labelY = _gauge.generateLabelY(getLabelHeight("4"),60,padding);
+            addLabel(labelX,labelY,"4");
+            labelX = _gauge.generateLabelX(getLabelWidth("5"),30,padding);
+            labelY = _gauge.generateLabelY(getLabelHeight("5"),30,padding);
+            addLabel(labelX,labelY,"5");
+            labelX = _gauge.generateLabelX(getLabelWidth("6"),0,padding);
+            labelY = _gauge.generateLabelY(getLabelHeight("6"),0,padding);
+            addLabel(labelX,labelY,"6");
+            labelX = _gauge.generateLabelX(getLabelWidth("7"),330,padding);
+            labelY = _gauge.generateLabelY(getLabelHeight("7"),330,padding);
+            addLabel(labelX,labelY,"7");
+            labelX = _gauge.generateLabelX(getLabelWidth("8"),300,padding);
+            labelY = _gauge.generateLabelY(getLabelHeight("8"),300,padding);
+            addLabel(labelX,labelY,"8");
+            labelX = _gauge.generateLabelX(getLabelWidth("9"),270,padding);
+            labelY = _gauge.generateLabelY(getLabelHeight("9"),270,padding);
+            addLabel(labelX,labelY,"9");
+
+            break;
+        }
+        case 3: {
+            labelX = _gauge.generateLabelX(getLabelWidth("0"),180,padding);
+            labelY = _gauge.generateLabelY(getLabelHeight("0"),180,padding);
+            addLabel(labelX,labelY,"0");
+            labelX = _gauge.generateLabelX(getLabelWidth("25"),90,padding);
+            labelY = _gauge.generateLabelY(getLabelHeight("25"),90,padding);
+            addLabel(labelX,labelY,"25");
+            labelX = _gauge.generateLabelX(getLabelWidth("50"),0,padding);
+            labelY = _gauge.generateLabelY(getLabelHeight("50"),0,padding);
+            addLabel(labelX,labelY,"50");
+            labelX = _gauge.generateLabelX(getLabelWidth("75"),270,padding);
+            labelY = _gauge.generateLabelY(getLabelHeight("75"),270,padding);
+            addLabel(labelX,labelY,"75");
+
+            break;
+        }
+    }
+}
+
+void Mako::drawMenu(int menuType, String title)
 {
     resetScreen();
 
-    drawTitleMessage("MENU");
+    drawTitleMessage(title);
 
-    Gauge menuGauge{};
-    _gauge = menuGauge;
+    Menu menu{};
+    menu.init();
 
-    addMenuButtons();
-    drawGaugeButtons();
-}
-
-void Mako::addNextBackButtons()
-{
-    int buttonWidth = 50;
-    int buttonHeight = 30;
-    int marginX = 20;
-    int backButtonX =  marginX;
-    int nextButtonX = _windowWidth - buttonWidth - marginX;
-    int buttonY = _windowHeight - 50;
-
-    Button backButton{};
-    backButton.init(marginX,buttonY,buttonWidth,buttonHeight,"Prev",5);
-    _gauge._buttons[0] = backButton;
-
-    Button nextButton{};
-    nextButton.init(nextButtonX,buttonY,buttonWidth,buttonHeight,"Next",6);
-    _gauge._buttons[1] = nextButton;
-}
-
-void Mako::addMenuButton()
-{
-    int buttonWidth = 50;
-    int buttonHeight = 30;
-    int buttonX = 20;
-    int buttonY = 50;
-
-    Button menuButton{};
-    menuButton.init(buttonX,buttonY,buttonWidth,buttonHeight,"Menu",7);
-    _gauge._buttons[3] = menuButton;
-}
-
-void Mako::addMenuButtons()
-{
-    int buttonWidth = 50;
-    int buttonHeight = 30;
-    int exitButtonX = _windowWidth - buttonWidth - 20;
+    int exitButtonWidth = 50;
+    int exitButtonHeight = 30;
+    int exitButtonX = _windowWidth - exitButtonWidth - 20;
     int exitButtonY = 50;
+    String exitButtonLabel = "Exit";
+    int exitButtonAction = 0;
 
     Button exitButton{};
-    exitButton.init(exitButtonX,exitButtonY,buttonWidth,buttonHeight,"Exit",0);
-    _gauge._buttons[4] = exitButton;
-}
+    exitButton.init(exitButtonX,exitButtonY,exitButtonWidth,exitButtonHeight,exitButtonLabel,exitButtonAction);
+    menu._buttons[0] = exitButton;
 
-void Mako::drawGaugeButtons()
-{
-    for (int x = 0; x < sizeof(_gauge._buttons)/sizeof(_gauge._buttons[0]); x = x + 1) {
-        addButton(_gauge._buttons[x]._x1,_gauge._buttons[x]._y1,_gauge._buttons[x]._width,_gauge._buttons[x]._height,_gauge._buttons[x]._label);
+    _menu = menu;
+
+    for (int x = 0; x < sizeof(_menu._buttons)/sizeof(_menu._buttons[0]); x = x + 1) {
+        addButton(_menu._buttons[x]._x1,_menu._buttons[x]._y1,_menu._buttons[x]._width,_menu._buttons[x]._height,_menu._buttons[x]._label);
     }
 }
 

@@ -23,6 +23,7 @@ class Gauge
         int _needleX;
         int _needleY;
         Button _buttons[10];
+        // TODO: Refactor labels to separate class and test on Arduino
         void init(int centerX, int centerY, int radius, int gaugeType);
         void addLabel(String label, int angle);
         int generateNeedleX(int angle, int needleLength);

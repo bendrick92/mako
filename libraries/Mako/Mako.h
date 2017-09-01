@@ -3,6 +3,7 @@
 
 #include "UTFT.h"
 #include "Gauge.h"
+#include "Menu.h"
 #include "OBD2UART.h"
 
 class Mako : public UTFT
@@ -13,10 +14,8 @@ class Mako : public UTFT
             
         }
         COBD _obd;
-        int _windowWidth;
-        int _windowHeight;
-        bool _testMode;
         Gauge _gauge;
+        Menu _menu;
         void init(byte orientation, bool testMode);
         void process();
         void setupGaugeLayout();
@@ -43,14 +42,15 @@ class Mako : public UTFT
         void drawRpmNeedle(int rpm, bool outputDigital);
         void drawThrottleGauge();
         void drawThrottleNeedle(int throttlePerc, bool outputDigital);
-        void drawMenu();
-        void addNextBackButtons();
-        void addMenuButton();
-        void addMenuButtons();
-        void drawGaugeButtons();
+        void drawMainMenu();
+        void drawGauge(int gaugeType, String title);
+        void drawMenu(int menuType, String title);
         void resetScreen();
     private:
         byte _orientation;
+        bool _testMode;
+        int _windowWidth;
+        int _windowHeight;
 };
 
 #endif
