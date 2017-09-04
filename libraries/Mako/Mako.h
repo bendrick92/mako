@@ -21,7 +21,7 @@ class Mako : public UTFT
         void setupGaugeLayout();
         void readTouchInput();
         void processButtonClick(int buttonAction);
-        int getCurrentGaugeType();
+        GAUGE_TYPES getCurrentGaugeType();
         void cycleToPrevGauge();
         void cycleToNextGauge();
         void addButton(int buttonX, int buttonY, int buttonWidth, int buttonHeight, String buttonText);
@@ -43,8 +43,8 @@ class Mako : public UTFT
         void drawThrottleGauge();
         void drawThrottleNeedle(int throttlePerc, bool outputDigital);
         void drawMainMenu();
-        void drawGauge(int gaugeType, String title);
-        void drawMenu(int menuType, String title);
+        void drawGauge(GAUGE_TYPES gaugeType, String title);
+        void drawMenu(MENU_TYPES menuType, String title);
         void resetScreen();
     private:
         byte _orientation;

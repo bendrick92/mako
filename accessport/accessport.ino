@@ -3,7 +3,7 @@
 Mako mako{};
 
 void setup() {    
-  mako.init(PORTRAIT, true);
+  mako.init(PORTRAIT, false);
 }
 
 void loop() {

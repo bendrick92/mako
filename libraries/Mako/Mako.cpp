@@ -2,6 +2,7 @@
 #include "math.h"
 #include "Mako.h"
 #include "Gauge.h"
+#include "Label.h"
 #include "Menu.h"
 #include "touch.h"
 #include "OBD2UART.h"
@@ -36,10 +37,8 @@ void Mako::init(byte orientation, bool testMode)
 
 void Mako::process()
 {
-    int currentGaugeType = getCurrentGaugeType();
-
-    switch (currentGaugeType) {
-        case 0: {
+    switch (getCurrentGaugeType()) {
+        case BOOST_PSI: {
             int intakeKpa = 0;
             int atmosKpa = 0;
             float boostPsi = 0.0;
@@ -54,7 +53,7 @@ void Mako::process()
 
             break;
         }
-        case 1: {
+        case SPEED_MPH: {
             int kph = 0;
             int mph = 0;
 
@@ -67,7 +66,7 @@ void Mako::process()
 
             break;
         }
-        case 2: {
+        case ENGINE_RPM: {
             int rpm = 0;
 
             if (!_testMode) {
@@ -78,7 +77,7 @@ void Mako::process()
 
             break;
         }
-        case 3: {
+        case THROTTLE_PERC: {
             int throttlePerc = 0;
 
             if (!_testMode) {
@@ -137,7 +136,7 @@ void Mako::processButtonClick(int buttonAction)
     }
 }
 
-int Mako::getCurrentGaugeType()
+GAUGE_TYPES Mako::getCurrentGaugeType()
 {
     return _gauge._gaugeType;
 }
@@ -293,7 +292,7 @@ void Mako::drawDefaultGauge()
 
 void Mako::drawBoostGauge()
 {    
-    drawGauge(0,"BOOST");
+    drawGauge(BOOST_PSI,"BOOST");
 }
 
 void Mako::drawBoostNeedle(float psi, bool outputDigital)
@@ -311,7 +310,7 @@ void Mako::drawBoostNeedle(float psi, bool outputDigital)
 
 void Mako::drawMphGauge()
 {
-    drawGauge(1,"MPH");
+    drawGauge(SPEED_MPH,"MPH");
 }
 
 void Mako::drawMphNeedle(int mph, bool outputDigital)
@@ -329,7 +328,7 @@ void Mako::drawMphNeedle(int mph, bool outputDigital)
 
 void Mako::drawRpmGauge()
 {    
-    drawGauge(2,"RPM");
+    drawGauge(ENGINE_RPM,"RPM");
 }
 
 void Mako::drawRpmNeedle(int rpm, bool outputDigital)
@@ -347,7 +346,7 @@ void Mako::drawRpmNeedle(int rpm, bool outputDigital)
 
 void Mako::drawThrottleGauge()
 {
-    drawGauge(3,"THROTTLE");
+    drawGauge(THROTTLE_PERC,"THROTTLE");
 }
 
 void Mako::drawThrottleNeedle(int throttlePerc, bool outputDigital)
@@ -365,10 +364,10 @@ void Mako::drawThrottleNeedle(int throttlePerc, bool outputDigital)
 
 void Mako::drawMainMenu()
 {
-    drawMenu(0,"MAIN MENU");
+    drawMenu(MAIN,"MAIN MENU");
 }
 
-void Mako::drawGauge(int gaugeType, String title)
+void Mako::drawGauge(GAUGE_TYPES gaugeType, String title)
 {
     int centerX = _windowWidth / 2;
     int centerY = _windowHeight / 2;
@@ -430,7 +429,8 @@ void Mako::drawGauge(int gaugeType, String title)
     }
 
     switch (gaugeType) {
-        case 0: {
+        case BOOST_PSI: {
+            // TODO: Refactor to add labels to gauge first
             labelX = _gauge.generateLabelX(getLabelWidth("25"),300,padding);
             labelY = _gauge.generateLabelY(getLabelHeight("25"),300,padding);
             addLabel(labelX,labelY,"25");
@@ -461,7 +461,7 @@ void Mako::drawGauge(int gaugeType, String title)
 
             break;
         }
-        case 1: {
+        case SPEED_MPH: {
             labelX = _gauge.generateLabelX(getLabelWidth("0"),180,padding);
             labelY = _gauge.generateLabelY(getLabelHeight("0"),180,padding);
             addLabel(labelX,labelY,"0");
@@ -504,7 +504,7 @@ void Mako::drawGauge(int gaugeType, String title)
 
             break;
         }
-        case 2: {
+        case ENGINE_RPM: {
             labelX = _gauge.generateLabelX(getLabelWidth("0"),180,padding);
             labelY = _gauge.generateLabelY(getLabelHeight("0"),180,padding);
             addLabel(labelX,labelY,"0");
@@ -538,7 +538,7 @@ void Mako::drawGauge(int gaugeType, String title)
 
             break;
         }
-        case 3: {
+        case THROTTLE_PERC: {
             labelX = _gauge.generateLabelX(getLabelWidth("0"),180,padding);
             labelY = _gauge.generateLabelY(getLabelHeight("0"),180,padding);
             addLabel(labelX,labelY,"0");
@@ -555,16 +555,18 @@ void Mako::drawGauge(int gaugeType, String title)
             break;
         }
     }
+
+    // TODO: Loop to add all labels for gauge
 }
 
-void Mako::drawMenu(int menuType, String title)
+void Mako::drawMenu(MENU_TYPES menuType, String title)
 {
     resetScreen();
 
     drawTitleMessage(title);
 
     Menu menu{};
-    menu.init();
+    menu.init(menuType);
 
     int exitButtonWidth = 50;
     int exitButtonHeight = 30;

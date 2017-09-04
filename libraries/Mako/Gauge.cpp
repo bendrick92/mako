@@ -2,7 +2,7 @@
 #include "Gauge.h"
 #include "math.h"
 
-void Gauge::init(int centerX, int centerY, int radius, int gaugeType)
+void Gauge::init(int centerX, int centerY, int radius, GAUGE_TYPES gaugeType)
 {
     _centerX = centerX;
     _centerY = centerY;
